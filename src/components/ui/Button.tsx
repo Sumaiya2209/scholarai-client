@@ -28,7 +28,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     if (href) {
       return (
-        <Link href={href} className={classes}>
+        <Link href={href} className={classes} onClick={props.onClick as React.MouseEventHandler}>
           {children}
         </Link>
       );

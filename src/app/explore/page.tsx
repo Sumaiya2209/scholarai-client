@@ -11,6 +11,7 @@ import { RESEARCH_FIELDS } from "@/lib/constants";
 import { usePapers } from "@/hooks/usePapers";
 
 type SortOption = "newest" | "oldest" | "mostViewed";
+type DateRange = "" | "week" | "month" | "year";
 
 export default function ExplorePage() {
   return (
@@ -26,6 +27,7 @@ function ExploreContent() {
 
   const [search, setSearch] = useState(searchParams.get("search") || "");
   const [field, setField] = useState(searchParams.get("field") || "");
+  const [dateRange, setDateRange] = useState<DateRange>((searchParams.get("dateRange") as DateRange) || "");
   const [sort, setSort] = useState<SortOption>((searchParams.get("sort") as SortOption) || "newest");
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
 
@@ -43,6 +45,11 @@ function ExploreContent() {
     setPage(1);
   }
 
+  function handleDateRangeChange(value: DateRange) {
+    setDateRange(value);
+    setPage(1);
+  }
+
   function handleSortChange(value: SortOption) {
     setSort(value);
     setPage(1);
@@ -52,14 +59,16 @@ function ExploreContent() {
     const params = new URLSearchParams();
     if (debouncedSearch) params.set("search", debouncedSearch);
     if (field) params.set("field", field);
+    if (dateRange) params.set("dateRange", dateRange);
     if (sort !== "newest") params.set("sort", sort);
     if (page > 1) params.set("page", String(page));
     router.replace(`/explore${params.toString() ? `?${params}` : ""}`, { scroll: false });
-  }, [debouncedSearch, field, sort, page, router]);
+  }, [debouncedSearch, field, dateRange, sort, page, router]);
 
   const { data, isLoading, isFetching } = usePapers({
     search: debouncedSearch,
     field,
+    dateRange,
     sort,
     page,
     limit: 12,
@@ -69,7 +78,7 @@ function ExploreContent() {
     <Container className="py-10">
       <h1 className="mb-6 font-display text-3xl font-semibold text-ink">Explore papers</h1>
 
-      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_200px_180px]">
+      <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_180px_170px_170px]">
         <Input
           placeholder="Search by title, author, or field"
           value={search}
@@ -78,10 +87,14 @@ function ExploreContent() {
         <Select value={field} onChange={(e) => handleFieldChange(e.target.value)}>
           <option value="">All fields</option>
           {RESEARCH_FIELDS.map((f) => (
-            <option key={f} value={f}>
-              {f}
-            </option>
+            <option key={f} value={f}>{f}</option>
           ))}
+        </Select>
+        <Select value={dateRange} onChange={(e) => handleDateRangeChange(e.target.value as DateRange)}>
+          <option value="">Any time</option>
+          <option value="week">Past week</option>
+          <option value="month">Past month</option>
+          <option value="year">Past year</option>
         </Select>
         <Select value={sort} onChange={(e) => handleSortChange(e.target.value as SortOption)}>
           <option value="newest">Newest first</option>

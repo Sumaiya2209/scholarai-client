@@ -5,6 +5,7 @@ export interface PlatformStats {
   fieldsCount: number;
   totalViews: number;
   summariesGenerated: number;
+  fieldBreakdown: { field: string; count: number }[];
 }
 
 export function getPlatformStats() {
